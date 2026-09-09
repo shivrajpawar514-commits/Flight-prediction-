@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}AeroPulse AI | Multi-Criteria TOPSIS Recommender & Pareto Frontier{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">TOPSIS &amp; Pareto Multi-Criteria Flight Recommender</h1>
+    <p class="page-subtitle">Multi-Attribute Decision Making (MCDM) powered by TOPSIS and 2D Pareto Frontier trade-off optimization.</p>
+  </div>
+  <div style="display: flex; gap: 12px;">
+    <a href="/" class="btn-glass"><i class="fas fa-brain"></i> Price Forecaster</a>
+    <a href="/dashboard" class="btn-glass"><i class="fas fa-chart-line"></i> Market Intelligence</a>
+  </div>
+</div>
+
+<!-- Layout: Preference Sliders on Left, Pareto Chart on Right -->
+<div style="display: grid; grid-template-columns: 360px 1fr; gap: 24px; margin-bottom: 32px;">
+
+  <!-- Sliders Card -->
+  <div class="glass-card">
+    <div class="card-header-flex">
+      <h2 class="card-title"><i class="fas fa-sliders-h"></i> User Criteria Weights</h2>
+      <span class="badge-pill badge-cyan">MCDM Tuning</span>
+    </div>
+
+    <!-- Route Filter -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+      <div class="form-group">
+        <label class="form-label" for="filter-source">Origin</label>
+        <select id="filter-source" class="form-control-custom">
+          {% for src in sources %}
+          <option value="{{ src }}">{{ src }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="filter-dest">Destination</label>
+        <select id="filter-dest" class="form-control-custom">
+          {% for dst in destinations %}
+          <option value="{{ dst }}">{{ dst }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Sliders -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <span><i class="fas fa-wallet text-cyan"></i> Price Sensitivity (Cost)</span>
+        <span class="slider-val-tag" id="val-price">40%</span>
+      </div>
+      <input type="range" id="slider-price" class="custom-range" min="0" max="100" value="40">
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <span><i class="fas fa-stopwatch text-indigo"></i> Travel Duration (Speed)</span>
+        <span class="slider-val-tag" id="val-duration">25%</span>
+      </div>
+      <input type="range" id="slider-duration" class="custom-range" min="0" max="100" value="25">
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <span><i class="fas fa-shield-alt text-emerald"></i> On-Time Reliability</span>
+        <span class="slider-val-tag" id="val-reliability">15%</span>
+      </div>
+      <input type="range" id="slider-reliability" class="custom-range" min="0" max="100" value="15">
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <span><i class="fas fa-ban text-amber"></i> Stopover Avoidance</span>
+        <span class="slider-val-tag" id="val-stops">10%</span>
+      </div>
+      <input type="range" id="slider-stops" class="custom-range" min="0" max="100" value="10">
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <span><i class="fas fa-sun text-rose"></i> Prime Departure Window</span>
+        <span class="slider-val-tag" id="val-time">10%</span>
+      </div>
+      <input type="range" id="slider-time" class="custom-range" min="0" max="100" value="10">
+    </div>
+
+    <div style="margin-top: 16px; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+      <i class="fas fa-info-circle"></i> Adjust sliders to dynamically recompute Euclidean distances to the Positive Ideal Solution ($A^+$) and Negative Ideal Solution ($A^-$).
+    </div>
+  </div>
+
+  <!-- 2D Pareto Optimal Frontier Scatter Chart -->
+  <div class="glass-card">
+    <div class="card-header-flex">
+      <h2 class="card-title"><i class="fas fa-chart-scatter"></i> 2D Pareto Optimal Frontier (Price vs. Duration)</h2>
+      <span class="badge-pill badge-rose">Non-Dominated Set</span>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+      Pareto-optimal flights (⭐ stars) represent the mathematical efficiency frontier where you cannot get a faster flight without paying more, nor a cheaper flight without traveling longer.
+    </p>
+    <div id="pareto-scatter-chart" style="height: 340px;"></div>
+  </div>
+
+</div>
+
+<!-- Ranked Flights Table -->
+<div class="glass-card">
+  <div class="card-header-flex">
+    <h2 class="card-title"><i class="fas fa-trophy"></i> TOPSIS Ranked Flight Recommendations</h2>
+    <span class="badge-pill badge-emerald">Real-Time Multi-Attribute Rank</span>
+  </div>
+
+  <div class="table-responsive-custom">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Airline &amp; Badge</th>
+          <th>Route</th>
+          <th>Schedule &amp; Stops</th>
+          <th>Fare</th>
+          <th>TOPSIS Composite Score</th>
+        </tr>
+      </thead>
+      <tbody id="recommendations-tbody">
+        {% for f in recommendations %}
+        <tr>
+          <td style="font-family: var(--font-heading); font-weight: 700; color: var(--cyan);">#{{ loop.index }}</td>
+          <td>
+            <div style="font-weight: 600;">{{ f.airline }}</div>
+            <span class="badge-pill badge-cyan" style="margin-top: 4px;">{{ f.tag }}</span>
+          </td>
+          <td>{{ f.source }} → {{ f.destination }}</td>
+          <td>
+            <div>{{ f.dep_time }} - {{ f.arrival_time }}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">{{ f.duration_formatted }} • {{ f.stops_label }}</div>
+          </td>
+          <td style="font-family: var(--font-heading); font-weight: 700; font-size: 16px;">₹{{ f.price }}</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="flex: 1; background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; overflow: hidden;">
+                <div style="width: {{ f.score }}%; background: linear-gradient(90deg, #6366F1, #00F0FF); height: 100%;"></div>
+              </div>
+              <span style="font-family: var(--font-mono); font-weight: 600; color: #00F0FF;">{{ f.score }}</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
