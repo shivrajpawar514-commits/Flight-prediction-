@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}AeroPulse AI | REST API Documentation & Sandbox{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">REST API Documentation &amp; Live Interactive Sandbox</h1>
+    <p class="page-subtitle">Test and integrate production-grade AI/ML flight prediction, explainability, and MCDM endpoints in real time.</p>
+  </div>
+  <div style="display: flex; gap: 12px;">
+    <a href="/" class="btn-glass"><i class="fas fa-brain"></i> Price Forecaster</a>
+    <a href="/benchmark" class="btn-glass"><i class="fas fa-medal"></i> Model Benchmark</a>
+  </div>
+</div>
+
+<!-- Interactive Live API Sandbox -->
+<div class="glass-card" style="margin-bottom: 36px; border-color: rgba(0, 240, 255, 0.3);">
+  <div class="card-header-flex">
+    <h2 class="card-title"><i class="fas fa-terminal text-cyan"></i> Live Interactive API Console</h2>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <span class="badge-pill badge-indigo" id="api-status-tag">Ready</span>
+      <span class="badge-pill badge-cyan">POST / GET</span>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+    <!-- Left: Request Configuration -->
+    <div>
+      <div style="margin-bottom: 16px;">
+        <label class="form-label" for="api-endpoint-select">Select API Endpoint</label>
+        <div style="display: flex; gap: 10px;">
+          <span class="badge-pill badge-emerald" id="api-method-tag" style="height: 44px; display: inline-flex; align-items: center; padding: 0 16px; font-weight: 700;">POST</span>
+          <select id="api-endpoint-select" class="form-control-custom">
+            <option value="/api/predict">/api/predict (Prediction, SHAP XAI &amp; Advisor)</option>
+            <option value="/api/whatif">/api/whatif (Sensitivity &amp; Scenario Matrix)</option>
+            <option value="/api/recommend">/api/recommend (TOPSIS &amp; Pareto Ranking)</option>
+            <option value="/api/simulate">/api/simulate (Monte Carlo Distribution)</option>
+            <option value="/api/benchmark">/api/benchmark (Model Metrics Leaderboard)</option>
+            <option value="/api/analytics/routes">/api/analytics/routes (Route Intelligence)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label" for="api-request-payload">JSON Request Payload</label>
+        <textarea id="api-request-payload" class="form-control-custom" rows="12" style="font-family: var(--font-mono); font-size: 13px; line-height: 1.4; resize: vertical;">{
+  "Dep_Time": "2026-06-15T09:30",
+  "Arrival_Time": "2026-06-15T12:45",
+  "Source": "Delhi",
+  "Destination": "Cochin",
+  "stops": 0,
+  "airline": "IndiGo",
+  "model_name": "Stacking Ensemble"
+}</textarea>
+      </div>
+
+      <button id="api-send-btn" class="btn-cyber" style="width: 100%;">
+        <i class="fas fa-paper-plane"></i> Execute API Call
+      </button>
+    </div>
+
+    <!-- Right: Live JSON Response Viewer -->
+    <div>
+      <label class="form-label">Live JSON Server Response</label>
+      <pre id="api-response-viewer" style="background: rgba(10, 16, 30, 0.95); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); padding: 18px; color: #38BDF8; font-family: var(--font-mono); font-size: 12px; height: 380px; overflow: auto; line-height: 1.5;">Click "Execute API Call" to inspect live response...</pre>
+    </div>
+
+  </div>
+</div>
+
+<!-- API Endpoints Reference Cards -->
+<div class="card-header-flex" style="margin-bottom: 20px;">
+  <h2 class="page-title" style="font-size: 24px;">Endpoint Catalog &amp; Schemas</h2>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+
+  <!-- Endpoint 1 -->
+  <div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span class="badge-pill badge-emerald" style="font-weight: 700;">POST</span>
+      <span style="font-family: var(--font-mono); font-weight: 600; color: var(--cyan);">/api/predict</span>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+      Predicts fare, 80% &amp; 95% confidence intervals, game-theoretic SHAP feature attributions, and Buy/Wait advice.
+    </p>
+    <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
+      Params: Dep_Time, Arrival_Time, Source, Destination, stops, airline, model_name
+    </div>
+  </div>
+
+  <!-- Endpoint 2 -->
+  <div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span class="badge-pill badge-emerald" style="font-weight: 700;">POST</span>
+      <span style="font-family: var(--font-mono); font-weight: 600; color: var(--indigo);">/api/whatif</span>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+      Executes instant sensitivity analysis across competing airlines, stop counts, and departure hour shifts.
+    </p>
+    <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
+      Params: Dep_Time, Arrival_Time, Source, Destination, stops, airline
+    </div>
+  </div>
+
+  <!-- Endpoint 3 -->
+  <div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span class="badge-pill badge-emerald" style="font-weight: 700;">POST</span>
+      <span style="font-family: var(--font-mono); font-weight: 600; color: var(--violet);">/api/recommend</span>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+      Multi-Criteria Decision Making (TOPSIS) flight ranking and 2D Pareto Optimal trade-off set.
+    </p>
+    <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
+      Params: weight_price, weight_duration, weight_reliability, weight_stops, weight_time, source, destination
+    </div>
+  </div>
+
+  <!-- Endpoint 4 -->
+  <div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span class="badge-pill badge-cyan" style="font-weight: 700;">GET</span>
+      <span style="font-family: var(--font-mono); font-weight: 600; color: var(--amber);">/api/benchmark</span>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+      Returns evaluation metrics ($R^2$, RMSE, MAE, MAPE, 5-Fold Cross-Val, Latency) for all 6 models.
+    </p>
+    <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
+      Returns: JSON Benchmark Leaderboard &amp; Feature Importances
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
